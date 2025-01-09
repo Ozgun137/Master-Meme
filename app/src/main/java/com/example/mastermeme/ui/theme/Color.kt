@@ -13,3 +13,8 @@ val Pink40 = Color(0xFF7D5260)
 val SurfaceContainer = Color(0xFF1D1B20)
 val MasterMemeBlack = Color(0xFF0F0D13)
 val MasterMemeWhite = Color(0xFFE6E0E9)
+
+val MasterMemeGradientFirst = Color(0xFFEADDFF)
+val MasterMemeGradientSecond = Color(0xFFD0BCFE)
+
+val MasterMemeOutline = Color(0xFF79747E)
