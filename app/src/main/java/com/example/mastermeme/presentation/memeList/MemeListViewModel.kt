@@ -2,18 +2,26 @@ package com.example.mastermeme.presentation.memeList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mastermeme.domain.GetTemplatesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.mastermeme.presentation.memeList.MemeListAction.OnCreateMemeClicked
+import com.example.mastermeme.presentation.memeList.MemeListAction.OnBottomSheetDismissed
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class MemeListViewModel : ViewModel() {
+class MemeListViewModel(
+    private val getTemplatesUseCase: GetTemplatesUseCase
+) : ViewModel() {
 
     private val _memeListState = MutableStateFlow((MemeListUiState()))
     val memeListState = _memeListState.asStateFlow()
         .onStart {
             loadMemes()
+            loadTemplates()
         }
         .stateIn(
             scope = viewModelScope,
@@ -21,18 +29,39 @@ class MemeListViewModel : ViewModel() {
             initialValue = MemeListUiState()
         )
 
+    fun onAction(action: MemeListAction) {
+        when (action) {
+            OnCreateMemeClicked -> {
+                _memeListState.update {
+                    it.copy(
+                        shouldShowModalBottomSheet = true
+                    )
+                }
+            }
 
-     private fun loadMemes() {
+            OnBottomSheetDismissed -> {
+                _memeListState.update {
+                    it.copy(
+                        shouldShowModalBottomSheet = false
+                    )
+                }
+            }
+        }
+    }
 
-     }
 
-     private fun loadTemplates() {
+    private fun loadMemes() {
+        //Load memes
+    }
 
-     }
-
-
-
-
+    private fun loadTemplates() = viewModelScope.launch {
+        val templates = getTemplatesUseCase().getOrNull() ?: emptyList()
+        _memeListState.update {
+            it.copy(
+                templates = templates
+            )
+        }
+    }
 
 
 }

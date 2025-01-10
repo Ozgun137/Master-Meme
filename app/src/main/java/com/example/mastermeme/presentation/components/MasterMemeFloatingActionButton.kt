@@ -1,6 +1,7 @@
 package com.example.mastermeme.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +39,8 @@ fun MasterMemeFloatingActionButton(
                         MasterMemeGradientSecond
                     )
                 )
-            ),
+            )
+            .clickable { onClick() },
         contentAlignment = androidx.compose.ui.Alignment.Center
     ) {
         Icon(

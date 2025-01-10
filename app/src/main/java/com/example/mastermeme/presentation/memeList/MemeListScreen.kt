@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
@@ -20,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,6 +28,7 @@ import com.example.mastermeme.R
 import com.example.mastermeme.presentation.components.MasterMemeFloatingActionButton
 import com.example.mastermeme.presentation.components.MasterMemeScaffold
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
+import com.example.mastermeme.presentation.components.MemeTemplatesModalBottomSheet
 import com.example.mastermeme.ui.theme.MasterMemeBlack
 import com.example.mastermeme.ui.theme.MasterMemeOutline
 import com.example.mastermeme.ui.theme.MasterMemeTheme
@@ -42,14 +40,28 @@ fun MemeListScreenRoot(
 ) {
     val memeListState by viewModel.memeListState.collectAsStateWithLifecycle()
 
-    MemeListScreen(memeListState = memeListState)
+    MemeListScreen(
+        memeListState = memeListState,
+        onAction = viewModel::onAction
+    )
 }
 
 @Composable
 fun MemeListScreen(
     modifier: Modifier = Modifier,
-    memeListState: MemeListUiState
+    memeListState: MemeListUiState,
+    onAction : (MemeListAction) -> Unit
 ) {
+
+    if(memeListState.shouldShowModalBottomSheet) {
+        MemeTemplatesModalBottomSheet(
+            isSheetOpen = true,
+            onSheetDismissed = {
+                onAction(MemeListAction.OnBottomSheetDismissed)
+            },
+            templates = memeListState.templates
+        )
+    }
 
     MasterMemeScaffold(
         topAppBar = {
@@ -61,7 +73,9 @@ fun MemeListScreen(
             MasterMemeFloatingActionButton(
                 modifier = Modifier.padding(21.dp),
                 icon = Icons.Default.Add,
-                onClick = {},
+                onClick = {
+                    onAction(MemeListAction.OnCreateMemeClicked)
+                },
                 contentDescription = stringResource(R.string.create_meme)
             )
         }
@@ -112,6 +126,7 @@ fun MemeListEmptyContent() {
 @Composable
 fun MemeListScreenPreview() = MasterMemeTheme {
     MemeListScreen(
-        memeListState = MemeListUiState()
+        memeListState = MemeListUiState(),
+        onAction = {}
     )
 }

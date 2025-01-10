@@ -18,3 +18,4 @@ val MasterMemeGradientFirst = Color(0xFFEADDFF)
 val MasterMemeGradientSecond = Color(0xFFD0BCFE)
 
 val MasterMemeOutline = Color(0xFF79747E)
+val MasterMemeOnSurface = Color(0xFFE6E0E9)
