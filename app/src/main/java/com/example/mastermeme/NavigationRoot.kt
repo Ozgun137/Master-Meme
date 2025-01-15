@@ -40,7 +40,7 @@ private fun NavGraphBuilder.memeListGraph(
             val args = it.toRoute<MemeEditor>()
             MemeEditorScreenRoot(
                 memeUri = args.memeUri,
-                onBackClick = {
+                onLeaveEditor = {
                     navController.navigateUp()
                 }
             )

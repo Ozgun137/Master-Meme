@@ -16,7 +16,9 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = MasterMemeBlack,
-    onSurface = MasterMemeWhite
+    secondary = MasterMemeSecondary,
+    surface = MasterMemeSurface,
+    onSurface = MasterMemeWhite,
 )
 
 
