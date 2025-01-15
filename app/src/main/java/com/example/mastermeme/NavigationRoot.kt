@@ -6,6 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import com.example.mastermeme.presentation.memeEditor.MemeEditorScreenRoot
 import com.example.mastermeme.presentation.memeList.MemeListScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -27,7 +29,21 @@ private fun NavGraphBuilder.memeListGraph(
 ) {
     navigation<Memes>(startDestination = MemeList) {
         composable<MemeList> {
-            MemeListScreenRoot()
+            MemeListScreenRoot(
+                onMemeSelected = {
+                    navController.navigate(MemeEditor(it))
+                }
+            )
+        }
+
+        composable<MemeEditor> {
+            val args = it.toRoute<MemeEditor>()
+            MemeEditorScreenRoot(
+                memeUri = args.memeUri,
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }
@@ -37,3 +53,6 @@ object Memes
 
 @Serializable
 object MemeList
+
+@Serializable
+data class MemeEditor(val memeUri: String)

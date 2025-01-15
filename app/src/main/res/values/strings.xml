@@ -7,4 +7,6 @@
     <string name="choose_template">Choose template\n</string>
     <string name="choose_template_subtext">Choose template for your next meme masterpiece</string>
     <string name="meme_template_content_description">Meme template grid</string>
+    <string name="meme_content_description">Meme Image</string>
+    <string name="new_meme">New meme</string>
 </resources>

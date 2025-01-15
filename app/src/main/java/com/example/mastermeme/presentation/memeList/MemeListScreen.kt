@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mastermeme.R
+import com.example.mastermeme.domain.model.MemeItem
 import com.example.mastermeme.presentation.components.MasterMemeFloatingActionButton
 import com.example.mastermeme.presentation.components.MasterMemeScaffold
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
@@ -36,13 +40,18 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MemeListScreenRoot(
-    viewModel: MemeListViewModel = koinViewModel()
+    viewModel: MemeListViewModel = koinViewModel(),
+    onMemeSelected: (String) -> Unit
 ) {
     val memeListState by viewModel.memeListState.collectAsStateWithLifecycle()
 
     MemeListScreen(
         memeListState = memeListState,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        templateSelected = {
+            onMemeSelected(it.imageUri)
+            viewModel.onAction(MemeListAction.OnBottomSheetDismissed)
+        }
     )
 }
 
@@ -50,7 +59,8 @@ fun MemeListScreenRoot(
 fun MemeListScreen(
     modifier: Modifier = Modifier,
     memeListState: MemeListUiState,
-    onAction : (MemeListAction) -> Unit
+    onAction : (MemeListAction) -> Unit,
+    templateSelected : (MemeItem.Template) -> Unit
 ) {
 
     if(memeListState.shouldShowModalBottomSheet) {
@@ -59,7 +69,10 @@ fun MemeListScreen(
             onSheetDismissed = {
                 onAction(MemeListAction.OnBottomSheetDismissed)
             },
-            templates = memeListState.templates
+            templates = memeListState.templates,
+            templateSelected = {
+                templateSelected(it)
+            }
         )
     }
 
@@ -79,16 +92,17 @@ fun MemeListScreen(
                 contentDescription = stringResource(R.string.create_meme)
             )
         }
-    ) { padding ->
+    ) { padding->
         Box(
-            modifier = Modifier
+            modifier = modifier.
+                 fillMaxSize()
                 .background(MasterMemeBlack)
                 .padding(padding)
-                .fillMaxSize(),
+                .padding(top = 16.dp, start = 8.dp, end = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             if(memeListState.memes.isNotEmpty()) {
-                //Meme Content
+                MemeListContent(state = memeListState)
             } else {
                 MemeListEmptyContent()
             }
@@ -97,7 +111,7 @@ fun MemeListScreen(
 }
 
 @Composable
-fun MemeListEmptyContent() {
+private fun MemeListEmptyContent() {
        Column (
            modifier = Modifier.fillMaxWidth(),
            horizontalAlignment = Alignment.CenterHorizontally
@@ -121,12 +135,34 @@ fun MemeListEmptyContent() {
        }
 }
 
+@Composable
+private fun MemeListContent(state: MemeListUiState) {
+    val scrollState = rememberLazyGridState()
+   LazyVerticalGrid(
+       columns = GridCells.Fixed(2),
+       state = scrollState,
+       content = {
+           items(state.memes.size) { index->
+               MemeGridItem(
+                   modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                   model = state.memes[index].imageUri,
+                   contentDescription = stringResource(R.string.meme_content_description)
+               )
+           }
+       }
+   )
+}
+
 
 @Preview
 @Composable
-fun MemeListScreenPreview() = MasterMemeTheme {
+private fun MemeListScreenPreview() = MasterMemeTheme {
+    val memesList = MemeListPreviewParameterProvider().values.toList()
     MemeListScreen(
-        memeListState = MemeListUiState(),
-        onAction = {}
+        memeListState = MemeListUiState(
+           memes = memesList
+        ),
+        onAction = {},
+        templateSelected = {}
     )
 }

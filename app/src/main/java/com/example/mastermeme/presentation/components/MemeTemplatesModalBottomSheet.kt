@@ -5,10 +5,9 @@ package com.example.mastermeme.presentation.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,7 +48,8 @@ fun MemeTemplatesModalBottomSheet(
     modifier: Modifier = Modifier,
     isSheetOpen: Boolean = false,
     onSheetDismissed : () ->Unit = {},
-    templates: List<MemeItem.Template> = emptyList()
+    templates: List<MemeItem.Template> = emptyList(),
+    templateSelected: (MemeItem.Template) -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -86,7 +86,8 @@ fun MemeTemplatesModalBottomSheet(
             ) {
                 MemeTemplatesContent(
                     modifier = modifier,
-                    templates = templates
+                    templates = templates,
+                    templateSelected = templateSelected
                 )
             }
         }
@@ -95,7 +96,8 @@ fun MemeTemplatesModalBottomSheet(
 @Composable
 fun MemeTemplatesContent(
     modifier: Modifier = Modifier,
-    templates: List<MemeItem.Template>
+    templates: List<MemeItem.Template>,
+    templateSelected : (MemeItem.Template) -> Unit
 ) {
 
     val scrollState = rememberLazyGridState()
@@ -137,14 +139,17 @@ fun MemeTemplatesContent(
             content = {
                 items(templates) { template ->
                     MemeGridItem(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp, vertical = 12.dp)
+                            .clickable {
+                                templateSelected(template)
+                            },
                         model = template.imageUri,
                         contentDescription = stringResource(R.string.meme_template_content_description)
                     )
                 }
             }
         )
-
     }
 }
 
@@ -153,7 +158,8 @@ fun MemeTemplatesContent(
 fun MemeTemplatesModalBottomSheetPreview() {
     MasterMemeTheme {
         MemeTemplatesModalBottomSheet(
-            isSheetOpen = true
+            isSheetOpen = true,
+            templateSelected = {}
         )
     }
 }
