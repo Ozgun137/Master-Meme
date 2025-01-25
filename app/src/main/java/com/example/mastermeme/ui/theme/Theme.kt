@@ -18,6 +18,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = MasterMemeBlack,
     secondary = MasterMemeSecondary,
     surface = MasterMemeSurface,
+    surfaceContainer = MasterMemeSurfaceContainer,
     onSurface = MasterMemeWhite,
 )
 

@@ -10,12 +10,14 @@ import androidx.compose.ui.Modifier
 fun MasterMemeScaffold(
     modifier: Modifier = Modifier,
     topAppBar: @Composable () -> Unit = {},
+    bottomAppBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
         topBar = topAppBar,
+        bottomBar = bottomAppBar,
         floatingActionButton = floatingActionButton,
         floatingActionButtonPosition = FabPosition.End
     ) { padding ->

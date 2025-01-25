@@ -11,7 +11,7 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val MasterMemeSurface = Color(0xFF211F26)
-val SurfaceContainer = Color(0xFF1D1B20)
+val MasterMemeSurfaceContainer = Color(0xFF1D1B20)
 val MasterMemeBlack = Color(0xFF0F0D13)
 val MasterMemeWhite = Color(0xFFE6E0E9)
 
@@ -22,3 +22,4 @@ val MasterMemeOutline = Color(0xFF79747E)
 val MasterMemeOnSurface = Color(0xFFE6E0E9)
 
 val MasterMemeSecondary = Color(0XFFCCC2DC)
+val MasterMemePrimaryFixed = Color(0XFF21005D)

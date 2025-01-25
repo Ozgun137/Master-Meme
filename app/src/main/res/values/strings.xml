@@ -12,4 +12,7 @@
     <string name="leave_editor">Leave editor?</string>
     <string name="leave_editor_description">You will lose your precious meme. If you\'re fine with that, press ‘Leave’.</string>
     <string name="leave">Leave</string>
+    <string name="add_text">Add text</string>
+    <string name="save_meme">Save meme</string>
+    <string name="tap_twice_to_edit">TAP TWICE TO EDIT</string>
 </resources>
