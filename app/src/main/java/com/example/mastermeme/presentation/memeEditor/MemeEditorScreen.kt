@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,10 +20,15 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,17 +45,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,15 +64,16 @@ import coil3.compose.AsyncImage
 import com.example.mastermeme.R
 import com.example.mastermeme.presentation.components.MasterMemeDialog
 import com.example.mastermeme.presentation.components.MasterMemeScaffold
+import com.example.mastermeme.presentation.components.MasterMemeSlider
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
 import com.example.mastermeme.presentation.components.MemeEditorBottomBar
 import com.example.mastermeme.presentation.memeEditor.components.DraggableText
-import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
-import com.example.mastermeme.ui.theme.MasterMemeBlack
 import com.example.mastermeme.ui.theme.MasterMemeGradientFirst
 import com.example.mastermeme.ui.theme.MasterMemeGradientSecond
 import com.example.mastermeme.ui.theme.MasterMemePrimaryFixed
+import com.example.mastermeme.ui.theme.MasterMemeSecondary
 import com.example.mastermeme.ui.theme.MasterMemeTheme
+import com.example.mastermeme.ui.theme.MasterMemeWhite
 import com.example.mastermeme.ui.theme.Purple80
 import org.koin.androidx.compose.koinViewModel
 
@@ -125,13 +133,10 @@ private fun MemeEditorScreen(
                     .background(MaterialTheme.colorScheme.surfaceContainer)
 
             ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    AddTextButton (onAction = onAction)
-                    SaveMemeButton()
+                if (memeEditorUiState.isTextSelected) {
+                    BottomBarViewTextSelected()
+                } else {
+                    DefaultBottomBarView(onAction = onAction)
                 }
 
             }
@@ -167,11 +172,20 @@ private fun MemeEditorScreen(
                         textBoxUI = textBoxUI,
                         imageWidth = imageWidth,
                         imageHeight = imageHeight,
-                        onTextPositionChanged = { offset->
-                            onAction(MemeEditorAction.OnTextPositionChanged(
-                                id = textBoxUI.id,
-                                offset = offset
-                            ))
+                        onTextPositionChanged = { offset ->
+                            onAction(
+                                MemeEditorAction.OnTextPositionChanged(
+                                    id = textBoxUI.id,
+                                    offset = offset
+                                )
+                            )
+                        },
+                        onTextSelected = { selectedTextID ->
+                            onAction(
+                                MemeEditorAction.OnTextSelected(
+                                    id = selectedTextID
+                                )
+                            )
                         }
                     )
                 }
@@ -305,8 +319,10 @@ private fun SaveMemeButton() {
                 ),
         ) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp,
-                    vertical = 8.dp),
+                modifier = Modifier.padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp
+                ),
                 text = stringResource(R.string.save_meme),
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
@@ -319,6 +335,92 @@ private fun SaveMemeButton() {
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun DefaultBottomBarView(onAction: (MemeEditorAction) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
+        AddTextButton(onAction = onAction)
+        SaveMemeButton()
+    }
+}
+
+@Composable
+private fun BottomBarViewTextSelected() {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+            onClick = {}
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.baseline_close_24),
+                contentDescription = "adas",
+                tint = MasterMemeWhite
+            )
+        }
+
+
+        Text(
+            text = "Aa",
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 16.sp,
+                fontFamily = FontFamily(
+                    Font(
+                        resId = R.font.manrope_regular
+                    )
+                )
+
+            )
+        )
+
+
+        MasterMemeSlider(
+            modifier = Modifier.weight(1f),
+            color = MasterMemeSecondary,
+            trackStrokeWidth = 1.dp,
+            trackHeight = 1.dp,
+            trackCornerRadius = 1.dp
+        )
+
+
+        Text(
+            text = "Aa",
+            style = TextStyle(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 16.sp,
+                fontFamily = FontFamily(
+                    Font(
+                        resId = R.font.manrope_regular
+                    )
+                )
+
+            )
+        )
+
+        IconButton(
+            onClick = {}
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.baseline_check_24),
+                contentDescription = "adas",
+                tint = MasterMemeWhite
+            )
+        }
+
+
     }
 }
 

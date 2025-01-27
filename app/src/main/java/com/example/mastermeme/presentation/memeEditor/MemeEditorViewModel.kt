@@ -2,6 +2,7 @@ package com.example.mastermeme.presentation.memeEditor
 
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
+import com.example.mastermeme.MemeEditor
 import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
 import com.example.mastermeme.ui.theme.MasterMemeWhite
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +63,14 @@ class MemeEditorViewModel : ViewModel() {
                         }
                     }
                     currentState.copy(textBoxList = updatedList)
+                }
+            }
+
+            is MemeEditorAction.OnTextSelected -> {
+                _memeEditorUiState.update {
+                    it.copy(
+                        isTextSelected = true
+                    )
                 }
             }
 

@@ -1,6 +1,7 @@
 package com.example.mastermeme.presentation.memeEditor.components
 
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ fun DraggableText(
     id: Int,
     textBoxUI: TextBoxUI,
     onTextPositionChanged: (Offset) -> Unit,
+    onTextSelected : (Int) -> Unit,
     imageWidth : Float,
     imageHeight: Float
 ) {
@@ -55,6 +57,13 @@ fun DraggableText(
                         offset = Offset(newOffsetX, newOffsetY)
                         onTextPositionChanged(offset)
                     },
+                )
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        onTextSelected(id)
+                    }
                 )
             }
     ) {
