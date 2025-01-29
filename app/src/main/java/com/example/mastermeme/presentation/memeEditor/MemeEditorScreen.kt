@@ -3,45 +3,32 @@ package com.example.mastermeme.presentation.memeEditor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -68,6 +55,7 @@ import com.example.mastermeme.presentation.components.MasterMemeSlider
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
 import com.example.mastermeme.presentation.components.MemeEditorBottomBar
 import com.example.mastermeme.presentation.memeEditor.components.DraggableText
+import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
 import com.example.mastermeme.ui.theme.MasterMemeGradientFirst
 import com.example.mastermeme.ui.theme.MasterMemeGradientSecond
 import com.example.mastermeme.ui.theme.MasterMemePrimaryFixed
@@ -133,10 +121,17 @@ private fun MemeEditorScreen(
                     .background(MaterialTheme.colorScheme.surfaceContainer)
 
             ) {
-                if (memeEditorUiState.isTextSelected) {
-                    BottomBarViewTextSelected()
-                } else {
+                if (memeEditorUiState.selectedText == null) {
                     DefaultBottomBarView(onAction = onAction)
+                } else {
+                    BottomBarViewTextSelected(
+                        onApplyChangesClicked = { onAction(MemeEditorAction.OnApplyChangesClicked) },
+                        onCancelChangesClicked = { onAction(MemeEditorAction.OnCancelChangesClicked) },
+                        onSliderValueChanged = {
+                            onAction(MemeEditorAction.OnSliderValueChanged(it))
+                        },
+                        selectedText = memeEditorUiState.selectedText
+                    )
                 }
 
             }
@@ -149,6 +144,12 @@ private fun MemeEditorScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    onAction(MemeEditorAction.OnRootViewClicked)
+                }
                 .padding(padding)
                 .padding(top = screenHeight / 3)
         ) {
@@ -162,32 +163,45 @@ private fun MemeEditorScreen(
                         imageWidth = it.size.width.toFloat()
                         imageHeight = it.size.height.toFloat()
                     },
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds
             )
 
             if (memeEditorUiState.textBoxList.isNotEmpty()) {
                 memeEditorUiState.textBoxList.forEach { textBoxUI ->
-                    DraggableText(
-                        id = textBoxUI.id,
-                        textBoxUI = textBoxUI,
-                        imageWidth = imageWidth,
-                        imageHeight = imageHeight,
-                        onTextPositionChanged = { offset ->
-                            onAction(
-                                MemeEditorAction.OnTextPositionChanged(
-                                    id = textBoxUI.id,
-                                    offset = offset
-                                )
-                            )
-                        },
-                        onTextSelected = { selectedTextID ->
-                            onAction(
-                                MemeEditorAction.OnTextSelected(
-                                    id = selectedTextID
-                                )
-                            )
+                    key(textBoxUI.id) {
+                        val isEditing = memeEditorUiState.editingState?.id == textBoxUI.id
+                        val displayedTextBoxUI = if (isEditing) {
+                            memeEditorUiState.editingState!!
+                        } else {
+                            textBoxUI
                         }
-                    )
+
+                        DraggableText(
+                            id = displayedTextBoxUI.id,
+                            isSelected = displayedTextBoxUI.isSelected,
+                            textBoxUI = displayedTextBoxUI,
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            onTextDeleted = { deletedTextID ->
+                                onAction(MemeEditorAction.OnTextDeleteClicked(deletedTextID))
+                            },
+                            onTextPositionChanged = { offset ->
+                                onAction(
+                                    MemeEditorAction.OnTextPositionChanged(
+                                        id = displayedTextBoxUI.id,
+                                        offset = offset
+                                    )
+                                )
+                            },
+                            onTextSelected = { selectedTextID ->
+                                onAction(
+                                    MemeEditorAction.OnTextSelected(
+                                        id = selectedTextID
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -351,7 +365,12 @@ private fun DefaultBottomBarView(onAction: (MemeEditorAction) -> Unit) {
 }
 
 @Composable
-private fun BottomBarViewTextSelected() {
+private fun BottomBarViewTextSelected(
+    onApplyChangesClicked: () -> Unit,
+    onCancelChangesClicked: () -> Unit,
+    onSliderValueChanged: (Float) -> Unit,
+    selectedText: TextBoxUI,
+) {
 
     Row(
         modifier = Modifier
@@ -360,11 +379,11 @@ private fun BottomBarViewTextSelected() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
-            onClick = {}
+            onClick = { onCancelChangesClicked() }
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.baseline_close_24),
-                contentDescription = "adas",
+                contentDescription = stringResource(R.string.cancelChanges),
                 tint = MasterMemeWhite
             )
         }
@@ -389,9 +408,14 @@ private fun BottomBarViewTextSelected() {
         MasterMemeSlider(
             modifier = Modifier.weight(1f),
             color = MasterMemeSecondary,
+            textSize = selectedText.fontSize,
             trackStrokeWidth = 1.dp,
             trackHeight = 1.dp,
-            trackCornerRadius = 1.dp
+            trackCornerRadius = 1.dp,
+            onValueChanged = { sliderValue ->
+                onSliderValueChanged(sliderValue)
+            },
+            valueRange = 12f..72f
         )
 
 
@@ -411,7 +435,7 @@ private fun BottomBarViewTextSelected() {
         )
 
         IconButton(
-            onClick = {}
+            onClick = { onApplyChangesClicked() }
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.baseline_check_24),

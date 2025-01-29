@@ -18,6 +18,7 @@ import com.example.mastermeme.ui.theme.MasterMemeWhite
 @Composable
 fun StrokeTextView(
     text: String,
+    textSize : Float,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.wrapContentSize()) {
@@ -26,7 +27,7 @@ fun StrokeTextView(
             style = TextStyle(
                 fontFamily = FontFamily(Font(resId = R.font.impact)),
                 color = MasterMemeBlack,
-                fontSize = 40.sp,
+                fontSize = textSize.sp,
                 drawStyle = Stroke(
                     width = 8f
                 )
@@ -37,7 +38,7 @@ fun StrokeTextView(
             style = TextStyle(
                 fontFamily = FontFamily(Font(resId = R.font.impact)),
                 color = MasterMemeWhite,
-                fontSize = 40.sp,
+                fontSize = textSize.sp,
             )
         )
     }

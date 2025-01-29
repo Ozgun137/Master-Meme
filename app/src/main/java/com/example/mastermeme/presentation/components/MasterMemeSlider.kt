@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -26,23 +27,31 @@ import com.example.mastermeme.ui.theme.MasterMemeTheme
 @Composable
 fun MasterMemeSlider(
     modifier: Modifier = Modifier,
+    textSize : Float,
     trackHeight : Dp,
     trackCornerRadius : Dp,
     trackStrokeWidth: Dp,
-    color : Color = MasterMemeSecondary
+    color : Color = MasterMemeSecondary,
+    onValueChanged : (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
 ) {
 
-    var sliderPosition by remember {
-        mutableFloatStateOf(0.5f)
+    var sliderPosition by rememberSaveable {
+        mutableFloatStateOf(textSize)
+    }
+
+    LaunchedEffect(textSize) {
+        sliderPosition = textSize
     }
 
     Slider(
         modifier = modifier,
         value = sliderPosition,
+        valueRange = valueRange,
         onValueChange = {
             sliderPosition = it
+            onValueChanged(it)
         },
-
         thumb = {
             Canvas(
                 modifier = Modifier.size(24.dp)
@@ -85,8 +94,10 @@ private fun MasterMemeSliderPreview()  = MasterMemeTheme {
     MasterMemeSlider(
         trackHeight = 1.dp,
         trackCornerRadius = 1.dp,
-        trackStrokeWidth = 1.dp
+        trackStrokeWidth = 1.dp,
+        onValueChanged = {},
+        textSize = 42f,
+        valueRange = 12f..72f
     )
-
 }
 
