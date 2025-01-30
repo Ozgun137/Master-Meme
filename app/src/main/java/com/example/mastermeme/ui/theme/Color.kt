@@ -23,3 +23,5 @@ val MasterMemeOnSurface = Color(0xFFE6E0E9)
 
 val MasterMemeSecondary = Color(0XFFCCC2DC)
 val MasterMemePrimaryFixed = Color(0XFF21005D)
+
+val MasterMemePrimaryFixedVariant = Color(0XFF4F378B)

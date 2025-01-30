@@ -7,16 +7,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -32,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -59,6 +66,7 @@ import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
 import com.example.mastermeme.ui.theme.MasterMemeGradientFirst
 import com.example.mastermeme.ui.theme.MasterMemeGradientSecond
 import com.example.mastermeme.ui.theme.MasterMemePrimaryFixed
+import com.example.mastermeme.ui.theme.MasterMemePrimaryFixedVariant
 import com.example.mastermeme.ui.theme.MasterMemeSecondary
 import com.example.mastermeme.ui.theme.MasterMemeTheme
 import com.example.mastermeme.ui.theme.MasterMemeWhite
@@ -121,7 +129,7 @@ private fun MemeEditorScreen(
                     .background(MaterialTheme.colorScheme.surfaceContainer)
 
             ) {
-                if (memeEditorUiState.selectedText == null) {
+                if (memeEditorUiState.editingState == null) {
                     DefaultBottomBarView(onAction = onAction)
                 } else {
                     BottomBarViewTextSelected(
@@ -130,7 +138,7 @@ private fun MemeEditorScreen(
                         onSliderValueChanged = {
                             onAction(MemeEditorAction.OnSliderValueChanged(it))
                         },
-                        selectedText = memeEditorUiState.selectedText
+                        selectedText = memeEditorUiState.editingState
                     )
                 }
 
@@ -178,10 +186,13 @@ private fun MemeEditorScreen(
 
                         DraggableText(
                             id = displayedTextBoxUI.id,
-                            isSelected = displayedTextBoxUI.isSelected,
+                            isSelected = displayedTextBoxUI.id == memeEditorUiState.selectedText?.id,
                             textBoxUI = displayedTextBoxUI,
                             imageWidth = imageWidth,
                             imageHeight = imageHeight,
+                            onDoubleTap = { textID ->
+                                onAction(MemeEditorAction.OnTextDoubleTapped(textID))
+                            },
                             onTextDeleted = { deletedTextID ->
                                 onAction(MemeEditorAction.OnTextDeleteClicked(deletedTextID))
                             },
@@ -266,6 +277,100 @@ private fun MemeEditorScreen(
                 },
 
                 onDismiss = { onAction(MemeEditorAction.OnLeaveEditorDialogDismissed) }
+            )
+        }
+
+        if (memeEditorUiState.shouldShowUpdateTextDialog) {
+            MasterMemeDialog(
+                onDismiss = { onAction(MemeEditorAction.OnEditTextCancelClicked) },
+                primaryButton = {
+                    TextButton(
+                        onClick = {
+                            onAction(MemeEditorAction.OnTextChangeApplied)
+                        }
+                    ) {
+                        Text(
+                            text = "Ok",
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontFamily = FontFamily(
+                                    Font(
+                                        resId = R.font.manrope_regular
+                                    )
+                                ),
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+                },
+
+                secondaryButton = {
+                    TextButton(
+                        onClick = {
+                            onAction(MemeEditorAction.OnEditTextCancelClicked)
+                        }
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontFamily = FontFamily(
+                                    Font(R.font.manrope_regular)
+                                ),
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                        )
+                    }
+                },
+
+                title = "Text",
+
+                memeEditorDialogContent = {
+                    BasicTextField(
+                        value = memeEditorUiState.editingState?.text ?: "",
+                        onValueChange = {text->
+                            onAction(
+                                MemeEditorAction.OnTextChanged(
+                                    memeEditorUiState.editingState?.id ?: -1, text
+                                )
+                            )
+                        },
+                        textStyle = LocalTextStyle.current.copy(
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily(
+                                Font(
+                                    resId = R.font.manrope_regular
+                                )
+                            )
+                        ),
+                        cursorBrush = SolidColor(Color.White),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 0.dp)
+                                ) {
+                                    innerTextField()
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                HorizontalDivider(
+                                    thickness = 2.dp,
+                                    color = MasterMemePrimaryFixedVariant
+                                )
+                            }
+                        }
+                    )
+                },
             )
         }
     }

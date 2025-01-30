@@ -27,32 +27,98 @@ class MemeEditorViewModel : ViewModel() {
                 updateDialogVisibilityState(false)
             }
 
-            MemeEditorAction.OnAddTextClicked -> { createTextBox() }
+            MemeEditorAction.OnAddTextClicked -> {
+                createTextBox()
+            }
 
-            MemeEditorAction.OnApplyChangesClicked -> { applyChanges() }
+            MemeEditorAction.OnApplyChangesClicked -> {
+                applyChanges()
+            }
 
 
-            MemeEditorAction.OnCancelChangesClicked -> { cancelChanges() }
+            MemeEditorAction.OnCancelChangesClicked -> {
+                cancelChanges()
+            }
 
+            MemeEditorAction.OnEditTextCancelClicked -> {
+                _memeEditorUiState.update {
+                    it.copy(
+                        editingState = null,
+                        shouldShowUpdateTextDialog = false
+                    )
+                }
+            }
+
+            is MemeEditorAction.OnTextChanged -> {
+                val currentText = _memeEditorUiState.value.textBoxList.find { it.id == action.id }
+                    ?.copy(
+                        text = action.text
+                    )
+
+                _memeEditorUiState.update {
+                    it.copy(
+                        editingState = currentText
+                    )
+                }
+            }
+
+            MemeEditorAction.OnTextChangeApplied -> {
+                val currentEditingText = _memeEditorUiState.value.editingState
+
+                _memeEditorUiState.update { currentState ->
+                    val updatedTextBoxList = currentState.textBoxList.map { textBox ->
+                        if (textBox.id == currentEditingText?.id) currentEditingText else textBox
+                    }
+
+                    currentState.copy(
+                        textBoxList = updatedTextBoxList,
+                        shouldShowUpdateTextDialog = false,
+                        editingState = null
+                    )
+                }
+
+            }
+
+            is MemeEditorAction.OnTextDoubleTapped -> {
+                val currentText = _memeEditorUiState.value.textBoxList.find { it.id == action.id }
+
+                _memeEditorUiState.update {
+                    it.copy(
+                        selectedText = null,
+                        editingState = currentText,
+                        shouldShowUpdateTextDialog = true
+                    )
+                }
+            }
 
             is MemeEditorAction.OnTextPositionChanged -> {
                 updateTextPosition(action.id, action.offset)
             }
 
-            is MemeEditorAction.OnTextSelected -> { selectText(action.id) }
+            is MemeEditorAction.OnTextSelected -> {
+                selectText(action.id)
+            }
 
-            is MemeEditorAction.OnSliderValueChanged -> { updateTextSize(action.sliderValue) }
+            is MemeEditorAction.OnSliderValueChanged -> {
+                updateTextSize(action.sliderValue)
+            }
 
-            is MemeEditorAction.OnRootViewClicked -> { cancelEditingState() }
+            is MemeEditorAction.OnRootViewClicked -> {
+                if (_memeEditorUiState.value.editingState != null) {
+                    cancelChanges()
+                }
+            }
 
-            is MemeEditorAction.OnTextDeleteClicked -> { deleteTextBox(action.id) }
+            is MemeEditorAction.OnTextDeleteClicked -> {
+                deleteTextBox(action.id)
+            }
 
             else -> {}
         }
 
     }
 
-    private fun updateDialogVisibilityState(shouldShowDialog : Boolean) {
+    private fun updateDialogVisibilityState(shouldShowDialog: Boolean) {
         _memeEditorUiState.update {
             it.copy(shouldShowLeaveEditorDialog = shouldShowDialog)
         }
@@ -109,35 +175,15 @@ class MemeEditorViewModel : ViewModel() {
     }
 
     private fun cancelChanges() {
-        _memeEditorUiState.update { currentState ->
-            val selectedText = currentState.selectedText
-            if (selectedText != null) {
-                val historyStack = currentState.uiStatesHistory[selectedText.id]
-                val lastAppliedState = if ((historyStack?.size ?: 0) > 1) {
-                    historyStack?.lastOrNull()
-                } else {
-                    historyStack?.firstOrNull()
-                }
-
-                if (lastAppliedState != null) {
-                    val updatedTextBoxList = currentState.textBoxList.map { textBox ->
-                        if (textBox.id == selectedText.id) lastAppliedState else textBox
-                    }
-                    currentState.copy(
-                        textBoxList = updatedTextBoxList,
-                        selectedText = null,
-                        editingState = null
-                    )
-                } else {
-                    currentState
-                }
-            } else {
-                currentState
-            }
+        _memeEditorUiState.update {
+            it.copy(
+                selectedText = null,
+                editingState = null
+            )
         }
     }
 
-    private fun updateTextPosition(textBoxID : Int, offset: Offset) {
+    private fun updateTextPosition(textBoxID: Int, offset: Offset) {
         _memeEditorUiState.update { currentState ->
             val updatedList = currentState.textBoxList.map { textBoxUI ->
                 if (textBoxUI.id == textBoxID) {
@@ -151,27 +197,18 @@ class MemeEditorViewModel : ViewModel() {
     }
 
     private fun selectText(id: Int) {
-        var selectedText: TextBoxUI? = null
 
-        _memeEditorUiState.update { currentState ->
-            val updatedList = currentState.textBoxList.map { textBoxUI ->
-                if (textBoxUI.id == id) {
-                    selectedText = textBoxUI
-                    textBoxUI.copy(isSelected = true)
-                } else {
-                    textBoxUI.copy(isSelected = false)
-                }
-            }
+        val selectedText: TextBoxUI? = _memeEditorUiState.value.textBoxList.find { it.id == id }
 
-
-            currentState.copy(
-                textBoxList = updatedList,
-                selectedText = selectedText
+        _memeEditorUiState.update {
+            it.copy(
+                selectedText = selectedText,
+                editingState = selectedText
             )
         }
     }
 
-    private fun updateTextSize(sliderValue : Float) {
+    private fun updateTextSize(sliderValue: Float) {
         _memeEditorUiState.update { currentState ->
             val selectedText = currentState.selectedText
             if (selectedText != null) {
@@ -185,38 +222,14 @@ class MemeEditorViewModel : ViewModel() {
 
     private fun deleteTextBox(textBoxID: Int) {
         val currentTextBoxLists = _memeEditorUiState.value.textBoxList.toMutableList()
-        currentTextBoxLists.removeIf { it.id == textBoxID}
+        currentTextBoxLists.removeIf { it.id == textBoxID }
 
         _memeEditorUiState.update { currentState ->
             currentState.copy(
                 textBoxList = currentTextBoxLists,
                 selectedText = null,
+                editingState = null
             )
         }
     }
-
-    private fun cancelEditingState() {
-        _memeEditorUiState.update { currentState ->
-            val selectedText = currentState.selectedText
-            val isEditing = currentState.editingState != null
-
-            if (selectedText != null && isEditing) {
-                val historyStack = currentState.uiStatesHistory[selectedText.id]
-                val lastAppliedState = historyStack?.lastOrNull() ?: selectedText
-                val updatedTextBoxList = currentState.textBoxList.map { textBox ->
-                    if (textBox.id == selectedText.id) lastAppliedState else textBox
-                }
-
-                currentState.copy(
-                    textBoxList = updatedTextBoxList,
-                    selectedText = null,
-                    editingState = null
-                )
-            } else {
-                currentState
-            }
-        }
-    }
-
-
 }

@@ -35,6 +35,7 @@ fun DraggableText(
     imageHeight: Float,
     imageWidth: Float,
     isSelected: Boolean = false,
+    onDoubleTap: (Int) -> Unit,
     onTextDeleted: (Int) -> Unit,
     onTextPositionChanged: (Offset) -> Unit,
     onTextSelected: (Int) -> Unit,
@@ -82,6 +83,9 @@ fun DraggableText(
                 detectTapGestures(
                     onTap = {
                         onTextSelected(id)
+                    },
+                    onDoubleTap = {
+                       onDoubleTap(id)
                     }
                 )
             }
