@@ -13,9 +13,11 @@ sealed interface MemeEditorAction {
     data object OnApplyChangesClicked : MemeEditorAction
     data object OnCancelChangesClicked: MemeEditorAction
     data object OnBackClicked : MemeEditorAction
+    data object OnBottomSheetDismissed : MemeEditorAction
     data object OnEditTextCancelClicked : MemeEditorAction
     data object OnLeaveEditorClicked : MemeEditorAction
     data object OnLeaveEditorDialogDismissed : MemeEditorAction
     data object OnRootViewClicked : MemeEditorAction
     data object OnTextChangeApplied : MemeEditorAction
+    data object OnSaveMemeClicked : MemeEditorAction
 }

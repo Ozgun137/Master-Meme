@@ -61,8 +61,9 @@ import com.example.mastermeme.presentation.components.MasterMemeScaffold
 import com.example.mastermeme.presentation.components.MasterMemeSlider
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
 import com.example.mastermeme.presentation.components.MemeEditorBottomBar
+import com.example.mastermeme.presentation.components.MasterMemeModalBottomSheet
 import com.example.mastermeme.presentation.memeEditor.components.DraggableText
-import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
+import com.example.mastermeme.presentation.memeEditor.components.SaveMemeModalBottomSheet
 import com.example.mastermeme.ui.theme.MasterMemeGradientFirst
 import com.example.mastermeme.ui.theme.MasterMemeGradientSecond
 import com.example.mastermeme.ui.theme.MasterMemePrimaryFixed
@@ -75,23 +76,19 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MemeEditorScreenRoot(
-    memeUri: String,
-    onLeaveEditor: () -> Unit,
-    viewModel: MemeEditorViewModel = koinViewModel()
+    memeUri: String, onLeaveEditor: () -> Unit, viewModel: MemeEditorViewModel = koinViewModel()
 ) {
 
     val memeEditorUiState by viewModel.memeEditorUiState.collectAsStateWithLifecycle()
 
     MemeEditorScreen(
-        memeUri = memeUri,
-        onAction = { action ->
+        memeUri = memeUri, onAction = { action ->
             when (action) {
                 MemeEditorAction.OnLeaveEditorClicked -> onLeaveEditor()
                 else -> Unit
             }
             viewModel.onAction(action)
-        },
-        memeEditorUiState = memeEditorUiState
+        }, memeEditorUiState = memeEditorUiState
     )
 }
 
@@ -105,16 +102,13 @@ private fun MemeEditorScreen(
     var imageWidth by remember { mutableFloatStateOf(0f) }
     var imageHeight by remember { mutableFloatStateOf(0f) }
 
-    MasterMemeScaffold(
-        topAppBar = {
-            MasterMemeToolBar(
-                toolBarTitle = stringResource(R.string.new_meme),
-                showBackButton = true,
-                onBackClick = {
-                    onAction(MemeEditorAction.OnBackClicked)
-                }
-            )
-        },
+    MasterMemeScaffold(topAppBar = {
+        MasterMemeToolBar(toolBarTitle = stringResource(R.string.new_meme),
+            showBackButton = true,
+            onBackClick = {
+                onAction(MemeEditorAction.OnBackClicked)
+            })
+    },
 
         bottomAppBar = {
             MemeEditorBottomBar(
@@ -122,8 +116,7 @@ private fun MemeEditorScreen(
                     .fillMaxWidth()
                     .border(
                         width = 1.dp,
-                        color = MasterMemeGradientFirst
-                            .copy(alpha = 0.05f),
+                        color = MasterMemeGradientFirst.copy(alpha = 0.05f),
                         shape = RectangleShape
                     )
                     .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -144,23 +137,19 @@ private fun MemeEditorScreen(
 
             }
 
-        }
-    ) { padding ->
+        }) { padding ->
         val screenHeight = LocalDensity.current.run {
             LocalConfiguration.current.screenHeightDp.toDp()
         }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    onAction(MemeEditorAction.OnRootViewClicked)
-                }
-                .padding(padding)
-                .padding(top = screenHeight / 3)
-        ) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }) {
+                onAction(MemeEditorAction.OnRootViewClicked)
+            }
+            .padding(padding)
+            .padding(top = screenHeight / 3)) {
 
             AsyncImage(
                 model = memeUri,
@@ -184,8 +173,7 @@ private fun MemeEditorScreen(
                             textBoxUI
                         }
 
-                        DraggableText(
-                            id = displayedTextBoxUI.id,
+                        DraggableText(id = displayedTextBoxUI.id,
                             isSelected = displayedTextBoxUI.id == memeEditorUiState.selectedText?.id,
                             textBoxUI = displayedTextBoxUI,
                             imageWidth = imageWidth,
@@ -199,8 +187,7 @@ private fun MemeEditorScreen(
                             onTextPositionChanged = { offset ->
                                 onAction(
                                     MemeEditorAction.OnTextPositionChanged(
-                                        id = displayedTextBoxUI.id,
-                                        offset = offset
+                                        id = displayedTextBoxUI.id, offset = offset
                                     )
                                 )
                             },
@@ -210,16 +197,14 @@ private fun MemeEditorScreen(
                                         id = selectedTextID
                                     )
                                 )
-                            }
-                        )
+                            })
                     }
                 }
             }
         }
 
         if (memeEditorUiState.shouldShowLeaveEditorDialog) {
-            MasterMemeDialog(
-                title = stringResource(R.string.leave_editor),
+            MasterMemeDialog(title = stringResource(R.string.leave_editor),
                 memeEditorDialogContent = {
                     Text(
                         text = stringResource(R.string.leave_editor_description),
@@ -256,11 +241,9 @@ private fun MemeEditorScreen(
                 },
 
                 secondaryButton = {
-                    TextButton(
-                        onClick = {
-                            onAction(MemeEditorAction.OnLeaveEditorDialogDismissed)
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        onAction(MemeEditorAction.OnLeaveEditorDialogDismissed)
+                    }) {
                         Text(
                             text = "Cancel",
                             style = TextStyle(
@@ -276,22 +259,18 @@ private fun MemeEditorScreen(
                     }
                 },
 
-                onDismiss = { onAction(MemeEditorAction.OnLeaveEditorDialogDismissed) }
-            )
+                onDismiss = { onAction(MemeEditorAction.OnLeaveEditorDialogDismissed) })
         }
 
         if (memeEditorUiState.shouldShowUpdateTextDialog) {
             MasterMemeDialog(
                 onDismiss = { onAction(MemeEditorAction.OnEditTextCancelClicked) },
                 primaryButton = {
-                    TextButton(
-                        onClick = {
-                            onAction(MemeEditorAction.OnTextChangeApplied)
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        onAction(MemeEditorAction.OnTextChangeApplied)
+                    }) {
                         Text(
-                            text = "Ok",
-                            style = TextStyle(
+                            text = "Ok", style = TextStyle(
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontFamily = FontFamily(
                                     Font(
@@ -307,11 +286,9 @@ private fun MemeEditorScreen(
                 },
 
                 secondaryButton = {
-                    TextButton(
-                        onClick = {
-                            onAction(MemeEditorAction.OnEditTextCancelClicked)
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        onAction(MemeEditorAction.OnEditTextCancelClicked)
+                    }) {
                         Text(
                             text = "Cancel",
                             style = TextStyle(
@@ -330,9 +307,8 @@ private fun MemeEditorScreen(
                 title = "Text",
 
                 memeEditorDialogContent = {
-                    BasicTextField(
-                        value = memeEditorUiState.editingState?.text ?: "",
-                        onValueChange = {text->
+                    BasicTextField(value = memeEditorUiState.editingState?.text ?: "",
+                        onValueChange = { text ->
                             onAction(
                                 MemeEditorAction.OnTextChanged(
                                     memeEditorUiState.editingState?.id ?: -1, text
@@ -364,13 +340,27 @@ private fun MemeEditorScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 HorizontalDivider(
-                                    thickness = 2.dp,
-                                    color = MasterMemePrimaryFixedVariant
+                                    thickness = 2.dp, color = MasterMemePrimaryFixedVariant
                                 )
                             }
-                        }
-                    )
+                        })
                 },
+            )
+        }
+
+        if(memeEditorUiState.shouldShowSaveMemeSheet) {
+            MasterMemeModalBottomSheet (
+                modalBottomSheetHeightRatio = 0.2f,
+                isSheetOpen = true,
+                onSheetDismissed = {
+                    onAction(MemeEditorAction.OnBottomSheetDismissed)
+                },
+                modalBottomSheetContent = {
+                      SaveMemeModalBottomSheet(
+                          onSaveToDeviceClicked = {},
+                          onShareMemeClicked = {}
+                      )
+                }
             )
         }
     }
@@ -378,79 +368,54 @@ private fun MemeEditorScreen(
 
 @Composable
 private fun AddTextButton(
-    onAction: (MemeEditorAction) -> Unit
+    onAddTextClicked: () -> Unit,
 ) {
-    OutlinedButton(
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(
-            1.dp,
-            Brush.linearGradient(
-                colors = listOf(
-                    MasterMemeGradientFirst,
-                    Purple80
-                )
+    OutlinedButton(shape = RoundedCornerShape(8.dp), border = BorderStroke(
+        1.dp, Brush.linearGradient(
+            colors = listOf(
+                MasterMemeGradientFirst, Purple80
             )
-        ),
-        onClick = {
-            onAction(MemeEditorAction.OnAddTextClicked)
-        },
-        content = {
-            Text(
-                text = stringResource(R.string.add_text),
-                style = TextStyle(
-                    fontFamily = FontFamily(
-                        Font(R.font.manrope_regular)
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MasterMemeGradientFirst,
-                            Purple80
-                        )
-                    ),
-                    lineHeight = 20.sp,
-                    fontSize = 16.sp
-                )
+        )
+    ), onClick = {
+        onAddTextClicked()
+    }, content = {
+        Text(
+            text = stringResource(R.string.add_text), style = TextStyle(
+                fontFamily = FontFamily(
+                    Font(R.font.manrope_regular)
+                ), fontWeight = FontWeight.Bold, brush = Brush.linearGradient(
+                    colors = listOf(
+                        MasterMemeGradientFirst, Purple80
+                    )
+                ), lineHeight = 20.sp, fontSize = 16.sp
             )
-        }
-    )
+        )
+    })
 }
 
 @Composable
-private fun SaveMemeButton() {
-    Button(
-        shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent // Set to transparent to rely on the gradient brush
-        ),
-        onClick = {}
-    ) {
+private fun SaveMemeButton(
+    onSaveMemeClicked: () -> Unit,
+) {
+    Button(shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(
+        containerColor = Color.Transparent // Set to transparent to rely on the gradient brush
+    ), onClick = { onSaveMemeClicked() }) {
         Box(
-            modifier = Modifier
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MasterMemeGradientFirst,
-                            MasterMemeGradientSecond
-                        )
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ),
+            modifier = Modifier.background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        MasterMemeGradientFirst, MasterMemeGradientSecond
+                    )
+                ), shape = RoundedCornerShape(8.dp)
+            ),
         ) {
             Text(
                 modifier = Modifier.padding(
-                    horizontal = 16.dp,
-                    vertical = 8.dp
-                ),
-                text = stringResource(R.string.save_meme),
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily(
+                    horizontal = 16.dp, vertical = 8.dp
+                ), text = stringResource(R.string.save_meme), style = TextStyle(
+                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(
                         Font(R.font.manrope_regular)
-                    ),
-                    color = MasterMemePrimaryFixed,
-                    lineHeight = 20.sp,
-                    fontSize = 16.sp
+                    ), color = MasterMemePrimaryFixed, lineHeight = 20.sp, fontSize = 16.sp
                 )
             )
         }
@@ -464,8 +429,8 @@ private fun DefaultBottomBarView(onAction: (MemeEditorAction) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End
     ) {
-        AddTextButton(onAction = onAction)
-        SaveMemeButton()
+        AddTextButton(onAddTextClicked = { onAction(MemeEditorAction.OnAddTextClicked) })
+        SaveMemeButton(onSaveMemeClicked = { onAction(MemeEditorAction.OnSaveMemeClicked) })
     }
 }
 
@@ -478,14 +443,11 @@ private fun BottomBarViewTextSelected(
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = { onCancelChangesClicked() }
-        ) {
+        IconButton(onClick = { onCancelChangesClicked() }) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.baseline_close_24),
                 contentDescription = stringResource(R.string.cancelChanges),
@@ -495,8 +457,7 @@ private fun BottomBarViewTextSelected(
 
 
         Text(
-            text = "Aa",
-            style = TextStyle(
+            text = "Aa", style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 16.sp,
@@ -525,8 +486,7 @@ private fun BottomBarViewTextSelected(
 
 
         Text(
-            text = "Aa",
-            style = TextStyle(
+            text = "Aa", style = TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 16.sp,
@@ -539,9 +499,7 @@ private fun BottomBarViewTextSelected(
             )
         )
 
-        IconButton(
-            onClick = { onApplyChangesClicked() }
-        ) {
+        IconButton(onClick = { onApplyChangesClicked() }) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.baseline_check_24),
                 contentDescription = "adas",

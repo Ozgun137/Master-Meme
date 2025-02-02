@@ -32,7 +32,9 @@ import com.example.mastermeme.domain.model.MemeItem
 import com.example.mastermeme.presentation.components.MasterMemeFloatingActionButton
 import com.example.mastermeme.presentation.components.MasterMemeScaffold
 import com.example.mastermeme.presentation.components.MasterMemeToolBar
-import com.example.mastermeme.presentation.components.MemeTemplatesModalBottomSheet
+import com.example.mastermeme.presentation.components.MasterMemeModalBottomSheet
+import com.example.mastermeme.presentation.memeList.components.MemeGridItem
+import com.example.mastermeme.presentation.memeList.components.MemeTemplatesContent
 import com.example.mastermeme.ui.theme.MasterMemeBlack
 import com.example.mastermeme.ui.theme.MasterMemeOutline
 import com.example.mastermeme.ui.theme.MasterMemeTheme
@@ -64,14 +66,19 @@ fun MemeListScreen(
 ) {
 
     if(memeListState.shouldShowModalBottomSheet) {
-        MemeTemplatesModalBottomSheet(
+        MasterMemeModalBottomSheet(
             isSheetOpen = true,
             onSheetDismissed = {
                 onAction(MemeListAction.OnBottomSheetDismissed)
             },
-            templates = memeListState.templates,
-            templateSelected = {
-                templateSelected(it)
+            modalBottomSheetContent = {
+                MemeTemplatesContent(
+                    modifier = modifier,
+                    templates = memeListState.templates,
+                    templateSelected = {
+                        templateSelected(it)
+                    },
+                )
             }
         )
     }

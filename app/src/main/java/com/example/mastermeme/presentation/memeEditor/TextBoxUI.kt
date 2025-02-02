@@ -1,4 +1,4 @@
-package com.example.mastermeme.presentation.memeEditor.components
+package com.example.mastermeme.presentation.memeEditor
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color

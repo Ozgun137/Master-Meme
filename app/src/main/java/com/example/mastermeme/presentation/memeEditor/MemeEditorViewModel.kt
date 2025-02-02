@@ -2,7 +2,6 @@ package com.example.mastermeme.presentation.memeEditor
 
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
-import com.example.mastermeme.presentation.memeEditor.components.TextBoxUI
 import com.example.mastermeme.ui.theme.MasterMemeWhite
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +20,10 @@ class MemeEditorViewModel : ViewModel() {
         when (action) {
             MemeEditorAction.OnBackClicked -> {
                 updateDialogVisibilityState(true)
+            }
+
+            MemeEditorAction.OnBottomSheetDismissed -> {
+                updateSaveMemeSheetState(shouldShowSaveMemeSheet = false)
             }
 
             MemeEditorAction.OnLeaveEditorDialogDismissed -> {
@@ -49,17 +52,12 @@ class MemeEditorViewModel : ViewModel() {
                 }
             }
 
-            is MemeEditorAction.OnTextChanged -> {
-                val currentText = _memeEditorUiState.value.textBoxList.find { it.id == action.id }
-                    ?.copy(
-                        text = action.text
-                    )
+            MemeEditorAction.OnSaveMemeClicked -> {
+                updateSaveMemeSheetState(shouldShowSaveMemeSheet = true)
+            }
 
-                _memeEditorUiState.update {
-                    it.copy(
-                        editingState = currentText
-                    )
-                }
+            is MemeEditorAction.OnTextChanged -> {
+                changeText(textBoxID = action.id, text = action.text)
             }
 
             MemeEditorAction.OnTextChangeApplied -> {
@@ -229,6 +227,27 @@ class MemeEditorViewModel : ViewModel() {
                 textBoxList = currentTextBoxLists,
                 selectedText = null,
                 editingState = null
+            )
+        }
+    }
+
+    private fun updateSaveMemeSheetState(shouldShowSaveMemeSheet : Boolean) {
+        _memeEditorUiState.update {
+            it.copy(
+                shouldShowSaveMemeSheet = shouldShowSaveMemeSheet,
+            )
+        }
+    }
+
+    private fun changeText(textBoxID: Int, text: String) {
+        val currentText = _memeEditorUiState.value.textBoxList.find { it.id == textBoxID }
+            ?.copy(
+                text = text
+            )
+
+        _memeEditorUiState.update {
+            it.copy(
+                editingState = currentText
             )
         }
     }

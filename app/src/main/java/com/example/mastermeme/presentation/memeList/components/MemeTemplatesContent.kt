@@ -1,97 +1,29 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+package com.example.mastermeme.presentation.memeList.components
 
-package com.example.mastermeme.presentation.components
-
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mastermeme.R
 import com.example.mastermeme.domain.model.MemeItem
-import com.example.mastermeme.presentation.memeList.MemeGridItem
 import com.example.mastermeme.ui.theme.MasterMemeOnSurface
-import com.example.mastermeme.ui.theme.MasterMemeTheme
-
-@Composable
-fun MemeTemplatesModalBottomSheet(
-    modifier: Modifier = Modifier,
-    isSheetOpen: Boolean = false,
-    onSheetDismissed : () ->Unit = {},
-    templates: List<MemeItem.Template> = emptyList(),
-    templateSelected: (MemeItem.Template) -> Unit
-) {
-
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
-        if (isSheetOpen) {
-            ModalBottomSheet(
-                modifier = modifier
-                    .fillMaxSize(),
-                sheetState = sheetState,
-                onDismissRequest = { onSheetDismissed() },
-                dragHandle = {
-                    val isExpanded = sheetState.currentValue == SheetValue.Expanded
-                    val topPadding by animateFloatAsState(
-                        targetValue = if (isExpanded) 1f else 0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessMedium
-                        ),
-                        label = "padding"
-                    )
-
-                    val statusBarHeight = with(LocalDensity.current) {
-                        WindowInsets.statusBars.getTop(this).toDp()
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .padding(top = (statusBarHeight * topPadding))
-                    ) {
-                        BottomSheetDefaults.DragHandle()
-                    }
-                },
-            ) {
-                MemeTemplatesContent(
-                    modifier = modifier,
-                    templates = templates,
-                    templateSelected = templateSelected
-                )
-            }
-        }
-}
 
 @Composable
 fun MemeTemplatesContent(
@@ -149,17 +81,6 @@ fun MemeTemplatesContent(
                     )
                 }
             }
-        )
-    }
-}
-
-@Preview
-@Composable
-fun MemeTemplatesModalBottomSheetPreview() {
-    MasterMemeTheme {
-        MemeTemplatesModalBottomSheet(
-            isSheetOpen = true,
-            templateSelected = {}
         )
     }
 }

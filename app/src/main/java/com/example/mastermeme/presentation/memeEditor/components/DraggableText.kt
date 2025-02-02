@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.mastermeme.R
+import com.example.mastermeme.presentation.memeEditor.TextBoxUI
 import com.example.mastermeme.ui.theme.MasterMemeWhite
 
 @Composable
