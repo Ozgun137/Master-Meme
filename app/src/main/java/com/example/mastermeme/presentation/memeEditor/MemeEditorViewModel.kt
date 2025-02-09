@@ -1,17 +1,34 @@
+@file:OptIn(ExperimentalComposeApi::class)
+
 package com.example.mastermeme.presentation.memeEditor
 
+import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.mastermeme.domain.SaveMemeUseCase
+import com.example.mastermeme.domain.util.Result
 import com.example.mastermeme.ui.theme.MasterMemeWhite
+import dev.shreyaspatil.capturable.controller.CaptureController
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
-class MemeEditorViewModel : ViewModel() {
+class MemeEditorViewModel(
+    private val saveMemeUseCase: SaveMemeUseCase
+) : ViewModel() {
 
     private val _memeEditorUiState = MutableStateFlow(MemeEditorUiState())
     val memeEditorUiState = _memeEditorUiState.asStateFlow()
+
+    private val eventChannel = Channel<MemeEditorEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private var textBoxId = 0
 
@@ -54,6 +71,10 @@ class MemeEditorViewModel : ViewModel() {
 
             MemeEditorAction.OnSaveMemeClicked -> {
                 updateSaveMemeSheetState(shouldShowSaveMemeSheet = true)
+            }
+
+            is MemeEditorAction.OnSaveToDeviceClicked -> {
+                 saveMemeToDevice(action.captureController)
             }
 
             is MemeEditorAction.OnTextChanged -> {
@@ -249,6 +270,23 @@ class MemeEditorViewModel : ViewModel() {
             it.copy(
                 editingState = currentText
             )
+        }
+    }
+
+    private fun saveMemeToDevice(captureController: CaptureController) {
+        val bitmap = viewModelScope.async {
+            captureController.captureAsync().await().asAndroidBitmap()
+        }
+
+        viewModelScope.launch {
+            val result = saveMemeUseCase(bitmap.await())
+            if(result is Result.Error) {
+                  eventChannel.send(MemeEditorEvent.MemeSaveFailed)
+            }
+
+            else {
+                eventChannel.send(MemeEditorEvent.MemeSaved)
+            }
         }
     }
 }

@@ -23,4 +23,6 @@
     <string name="share_the_meme">Share the meme</string>
     <string name="share_meme_description">Share your meme or open it in the other App</string>
     <string name="share_meme_icon">Share meme icon</string>
+    <string name="meme_successfully_saved">Your meme is saved! Check your gallery.</string>
+    <string name="meme_can_not_be_saved">Unable to save meme. Please try again later.</string>
 </resources>

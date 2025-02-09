@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.example.mastermeme.presentation.memeEditor
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +37,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -43,6 +47,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -64,6 +69,7 @@ import com.example.mastermeme.presentation.components.MemeEditorBottomBar
 import com.example.mastermeme.presentation.components.MasterMemeModalBottomSheet
 import com.example.mastermeme.presentation.memeEditor.components.DraggableText
 import com.example.mastermeme.presentation.memeEditor.components.SaveMemeModalBottomSheet
+import com.example.mastermeme.presentation.util.ObserveAsEvents
 import com.example.mastermeme.ui.theme.MasterMemeGradientFirst
 import com.example.mastermeme.ui.theme.MasterMemeGradientSecond
 import com.example.mastermeme.ui.theme.MasterMemePrimaryFixed
@@ -72,6 +78,8 @@ import com.example.mastermeme.ui.theme.MasterMemeSecondary
 import com.example.mastermeme.ui.theme.MasterMemeTheme
 import com.example.mastermeme.ui.theme.MasterMemeWhite
 import com.example.mastermeme.ui.theme.Purple80
+import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -80,6 +88,27 @@ fun MemeEditorScreenRoot(
 ) {
 
     val memeEditorUiState by viewModel.memeEditorUiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    ObserveAsEvents(viewModel.events) {
+        when (it) {
+            MemeEditorEvent.MemeSaved -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.meme_successfully_saved),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            MemeEditorEvent.MemeSaveFailed -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.meme_can_not_be_saved),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
 
     MemeEditorScreen(
         memeUri = memeUri, onAction = { action ->
@@ -101,6 +130,8 @@ private fun MemeEditorScreen(
 
     var imageWidth by remember { mutableFloatStateOf(0f) }
     var imageHeight by remember { mutableFloatStateOf(0f) }
+
+    val captureController = rememberCaptureController()
 
     MasterMemeScaffold(topAppBar = {
         MasterMemeToolBar(toolBarTitle = stringResource(R.string.new_meme),
@@ -149,7 +180,9 @@ private fun MemeEditorScreen(
                 onAction(MemeEditorAction.OnRootViewClicked)
             }
             .padding(padding)
-            .padding(top = screenHeight / 3)) {
+            .padding(top = screenHeight / 3)
+            .capturable(captureController)
+        ) {
 
             AsyncImage(
                 model = memeUri,
@@ -357,7 +390,9 @@ private fun MemeEditorScreen(
                 },
                 modalBottomSheetContent = {
                       SaveMemeModalBottomSheet(
-                          onSaveToDeviceClicked = {},
+                          onSaveToDeviceClicked = {
+                              onAction(MemeEditorAction.OnSaveToDeviceClicked(captureController))
+                          },
                           onShareMemeClicked = {}
                       )
                 }
@@ -506,11 +541,8 @@ private fun BottomBarViewTextSelected(
                 tint = MasterMemeWhite
             )
         }
-
-
     }
 }
-
 
 @Preview
 @Composable
