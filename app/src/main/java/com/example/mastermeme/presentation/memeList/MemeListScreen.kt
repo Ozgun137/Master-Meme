@@ -2,6 +2,7 @@ package com.example.mastermeme.presentation.memeList
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -61,11 +62,11 @@ fun MemeListScreenRoot(
 fun MemeListScreen(
     modifier: Modifier = Modifier,
     memeListState: MemeListUiState,
-    onAction : (MemeListAction) -> Unit,
-    templateSelected : (MemeItem.Template) -> Unit
+    onAction: (MemeListAction) -> Unit,
+    templateSelected: (MemeItem.Template) -> Unit
 ) {
 
-    if(memeListState.shouldShowModalBottomSheet) {
+    if (memeListState.shouldShowModalBottomSheet) {
         MasterMemeModalBottomSheet(
             isSheetOpen = true,
             onSheetDismissed = {
@@ -99,16 +100,15 @@ fun MemeListScreen(
                 contentDescription = stringResource(R.string.create_meme)
             )
         }
-    ) { padding->
+    ) { padding ->
         Box(
-            modifier = modifier.
-                 fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(MasterMemeBlack)
                 .padding(padding)
                 .padding(top = 16.dp, start = 8.dp, end = 8.dp),
-            contentAlignment = Alignment.Center
         ) {
-            if(memeListState.memes.isNotEmpty()) {
+            if (memeListState.memes.isNotEmpty()) {
                 MemeListContent(state = memeListState)
             } else {
                 MemeListEmptyContent()
@@ -119,45 +119,53 @@ fun MemeListScreen(
 
 @Composable
 private fun MemeListEmptyContent() {
-       Column (
-           modifier = Modifier.fillMaxWidth(),
-           horizontalAlignment = Alignment.CenterHorizontally
-       ) {
-          Image(
-              painter = painterResource(R.drawable.empty_meme),
-              contentDescription = ""
-          )
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.empty_meme),
+                contentDescription = ""
+            )
 
-          Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-          Text(
-              text = stringResource(R.string.create_your_first_meme),
-              style = TextStyle(
-                  fontSize = 14.sp,
-                  lineHeight = 20.sp,
-                  fontWeight = FontWeight.Normal,
-                  color = MasterMemeOutline
-              )
-          )
-       }
+            Text(
+                text = stringResource(R.string.create_your_first_meme),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MasterMemeOutline
+                )
+            )
+        }
+    }
 }
 
 @Composable
 private fun MemeListContent(state: MemeListUiState) {
     val scrollState = rememberLazyGridState()
-   LazyVerticalGrid(
-       columns = GridCells.Fixed(2),
-       state = scrollState,
-       content = {
-           items(state.memes.size) { index->
-               MemeGridItem(
-                   modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                   model = state.memes[index].imageUri,
-                   contentDescription = stringResource(R.string.meme_content_description)
-               )
-           }
-       }
-   )
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Fixed(2),
+        state = scrollState,
+        content = {
+            items(state.memes.size) { index ->
+                MemeGridItem(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                    model = state.memes[index].imageUri,
+                    contentDescription = stringResource(R.string.meme_content_description)
+                )
+            }
+        }
+    )
 }
 
 
@@ -167,7 +175,7 @@ private fun MemeListScreenPreview() = MasterMemeTheme {
     val memesList = MemeListPreviewParameterProvider().values.toList()
     MemeListScreen(
         memeListState = MemeListUiState(
-           memes = memesList
+            memes = memesList
         ),
         onAction = {},
         templateSelected = {}

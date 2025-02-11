@@ -17,7 +17,9 @@ class SaveMemeUseCaseImpl(
     private val context: Context
 ) : SaveMemeUseCase {
 
-    override suspend fun invoke(bitmap: Bitmap): Result<Unit, Error> {
+    override suspend fun invoke(bitmap: Bitmap): Result<String?, Error> {
+        var filePath: String? = null
+
         return withContext(Dispatchers.IO) {
             val fileName = "meme_${UUID.randomUUID()}.jpg"
 
@@ -33,12 +35,13 @@ class SaveMemeUseCaseImpl(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     contentValues
                 )
-                imageUri?.let {
-                    contentResolver.openOutputStream(it)?.use { outputStream ->
+                imageUri?.let { uri->
+                    filePath = uri.toString()
+                    contentResolver.openOutputStream(uri)?.use { outputStream ->
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     }
                 }
-                Result.Success(Unit)
+                Result.Success(filePath)
             } catch (exception: Exception) {
                 coroutineContext.ensureActive()
                 Result.Error(FileError.FAILED_TO_SAVE)

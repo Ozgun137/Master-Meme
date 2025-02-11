@@ -3,6 +3,7 @@ package com.example.mastermeme.presentation.memeList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mastermeme.domain.GetTemplatesUseCase
+import com.example.mastermeme.domain.MemeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.mastermeme.presentation.memeList.MemeListAction.OnCreateMemeClicked
 import com.example.mastermeme.presentation.memeList.MemeListAction.OnBottomSheetDismissed
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MemeListViewModel(
-    private val getTemplatesUseCase: GetTemplatesUseCase
+    private val getTemplatesUseCase: GetTemplatesUseCase,
+    private val repository: MemeRepository
 ) : ViewModel() {
 
     private val _memeListState = MutableStateFlow((MemeListUiState()))
@@ -50,8 +52,14 @@ class MemeListViewModel(
     }
 
 
-    private fun loadMemes() {
-        //Load memes
+    private fun loadMemes() = viewModelScope.launch {
+        repository.getMemes().collect { memes ->
+            _memeListState.update {
+                it.copy(
+                    memes = memes
+                )
+            }
+        }
     }
 
     private fun loadTemplates() = viewModelScope.launch {

@@ -1,6 +1,7 @@
 package com.example.mastermeme.presentation.memeEditor
 
 data class MemeEditorUiState(
+    val isMemeSaved: Boolean = false,
     val selectedText: TextBoxUI? = null,
     val shouldShowLeaveEditorDialog:Boolean = false,
     val shouldShowUpdateTextDialog: Boolean = false,

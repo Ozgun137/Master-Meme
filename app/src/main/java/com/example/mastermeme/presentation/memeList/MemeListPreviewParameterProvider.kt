@@ -1,49 +1,61 @@
 package com.example.mastermeme.presentation.memeList
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.example.mastermeme.domain.model.MemeItem.Meme
 
-class MemeListPreviewParameterProvider : PreviewParameterProvider<MemeUi> {
+
+class MemeListPreviewParameterProvider : PreviewParameterProvider<Meme> {
 
     override val values = sequenceOf(
-        MemeUi(
-            id = "1",
+        Meme(
+            id = 1,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "2",
+        Meme(
+            id = 2,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "3",
+        Meme(
+            id = 3,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "4",
+        Meme(
+            id = 4,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "5",
+        Meme(
+            id = 5,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "6",
+        Meme(
+            id = 6,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "7",
+        Meme(
+            id = 7,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "8",
+        Meme(
+            id = 8,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "9",
+        Meme(
+            id = 9,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
-        MemeUi(
-            id = "10",
+        Meme(
+            id = 10,
             imageUri = "android.resource://com.example.mastermeme/drawable/vt4i_27",
+            timeStamp = System.currentTimeMillis()
         ),
     )
 

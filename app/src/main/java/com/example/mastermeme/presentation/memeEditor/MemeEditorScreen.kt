@@ -4,6 +4,7 @@ package com.example.mastermeme.presentation.memeEditor
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,10 +15,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
 import com.example.mastermeme.R
 import com.example.mastermeme.presentation.components.MasterMemeDialog
 import com.example.mastermeme.presentation.components.MasterMemeScaffold
@@ -84,7 +86,9 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MemeEditorScreenRoot(
-    memeUri: String, onLeaveEditor: () -> Unit, viewModel: MemeEditorViewModel = koinViewModel()
+    memeUri: String,
+    onLeaveEditor: () -> Unit,
+    viewModel: MemeEditorViewModel = koinViewModel()
 ) {
 
     val memeEditorUiState by viewModel.memeEditorUiState.collectAsStateWithLifecycle()
@@ -92,6 +96,14 @@ fun MemeEditorScreenRoot(
 
     ObserveAsEvents(viewModel.events) {
         when (it) {
+            MemeEditorEvent.LocalDiskFull -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.local_disk_full),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
             MemeEditorEvent.MemeSaved -> {
                 Toast.makeText(
                     context,
@@ -130,7 +142,6 @@ private fun MemeEditorScreen(
 
     var imageWidth by remember { mutableFloatStateOf(0f) }
     var imageHeight by remember { mutableFloatStateOf(0f) }
-
     val captureController = rememberCaptureController()
 
     MasterMemeScaffold(topAppBar = {
@@ -173,7 +184,7 @@ private fun MemeEditorScreen(
             LocalConfiguration.current.screenHeightDp.toDp()
         }
         Box(modifier = Modifier
-            .fillMaxSize()
+            .wrapContentSize()
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }) {
@@ -184,15 +195,18 @@ private fun MemeEditorScreen(
             .capturable(captureController)
         ) {
 
-            AsyncImage(
-                model = memeUri,
+            val aspectRatio = if (imageWidth > 0f && imageHeight > 0f) imageWidth / imageHeight else 1f
+
+            Image(
+                painter = rememberAsyncImagePainter(model = memeUri),
                 contentDescription = stringResource(R.string.meme_content_description),
                 modifier = Modifier
-                    .aspectRatio(1f)
+                    .fillMaxWidth()
                     .onGloballyPositioned {
                         imageWidth = it.size.width.toFloat()
                         imageHeight = it.size.height.toFloat()
-                    },
+                    }
+                    .aspectRatio(aspectRatio),
                 contentScale = ContentScale.FillBounds
             )
 
@@ -237,62 +251,69 @@ private fun MemeEditorScreen(
         }
 
         if (memeEditorUiState.shouldShowLeaveEditorDialog) {
-            MasterMemeDialog(title = stringResource(R.string.leave_editor),
-                memeEditorDialogContent = {
-                    Text(
-                        text = stringResource(R.string.leave_editor_description),
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontFamily = FontFamily(
-                                Font(R.font.manrope_regular)
-                            ),
-                            fontSize = 14.sp,
-                            lineHeight = 21.86.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                    )
-                },
-                primaryButton = {
-                    TextButton(
-                        onClick = {
-                            onAction(MemeEditorAction.OnLeaveEditorClicked)
-                        },
-                    ) {
+            if(!memeEditorUiState.isMemeSaved) {
+                MasterMemeDialog(title = stringResource(R.string.leave_editor),
+                    memeEditorDialogContent = {
                         Text(
-                            text = stringResource(R.string.leave),
+                            text = stringResource(R.string.leave_editor_description),
                             style = TextStyle(
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontFamily = FontFamily(
                                     Font(R.font.manrope_regular)
                                 ),
                                 fontSize = 14.sp,
-                                lineHeight = 20.sp,
-                                fontWeight = FontWeight.Bold
+                                lineHeight = 21.86.sp,
+                                fontWeight = FontWeight.Normal
                             ),
                         )
-                    }
-                },
-
-                secondaryButton = {
-                    TextButton(onClick = {
-                        onAction(MemeEditorAction.OnLeaveEditorDialogDismissed)
-                    }) {
-                        Text(
-                            text = "Cancel",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontFamily = FontFamily(
-                                    Font(R.font.manrope_regular)
+                    },
+                    primaryButton = {
+                        TextButton(
+                            onClick = {
+                                onAction(MemeEditorAction.OnLeaveEditorClicked)
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.leave),
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontFamily = FontFamily(
+                                        Font(R.font.manrope_regular)
+                                    ),
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    fontWeight = FontWeight.Bold
                                 ),
-                                fontSize = 14.sp,
-                                lineHeight = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                        )
-                    }
-                },
+                            )
+                        }
+                    },
 
-                onDismiss = { onAction(MemeEditorAction.OnLeaveEditorDialogDismissed) })
+                    secondaryButton = {
+                        TextButton(onClick = {
+                            onAction(MemeEditorAction.OnLeaveEditorDialogDismissed)
+                        }) {
+                            Text(
+                                text = "Cancel",
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontFamily = FontFamily(
+                                        Font(R.font.manrope_regular)
+                                    ),
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                            )
+                        }
+                    },
+
+                    onDismiss = { onAction(MemeEditorAction.OnLeaveEditorDialogDismissed) })
+            }
+
+            else {
+                onAction(MemeEditorAction.OnLeaveEditorClicked)
+            }
+
         }
 
         if (memeEditorUiState.shouldShowUpdateTextDialog) {
