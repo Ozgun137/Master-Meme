@@ -48,7 +48,10 @@ class MemeListViewModel(
                     )
                 }
             }
+
+            else -> {}
         }
+
     }
 
 

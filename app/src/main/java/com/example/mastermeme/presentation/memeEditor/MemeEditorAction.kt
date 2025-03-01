@@ -6,6 +6,7 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 sealed interface MemeEditorAction {
     data class OnTextDoubleTapped(val id: Int) : MemeEditorAction
     data class OnSaveToDeviceClicked(val captureController: CaptureController) : MemeEditorAction
+    data class OnShareMemeClicked(val captureController: CaptureController) : MemeEditorAction
     data class OnSliderValueChanged(val sliderValue: Float) : MemeEditorAction
     data class OnTextChanged(val id: Int, val text: String) : MemeEditorAction
     data class OnTextDeleteClicked(val id : Int) : MemeEditorAction

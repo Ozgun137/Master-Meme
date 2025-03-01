@@ -60,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.example.mastermeme.R
 import com.example.mastermeme.presentation.components.MasterMemeDialog
@@ -116,6 +115,14 @@ fun MemeEditorScreenRoot(
                 Toast.makeText(
                     context,
                     context.getString(R.string.meme_can_not_be_saved),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            MemeEditorEvent.ShareMemeFailed -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.meme_can_not_be_shared),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -195,8 +202,6 @@ private fun MemeEditorScreen(
             .capturable(captureController)
         ) {
 
-            val aspectRatio = if (imageWidth > 0f && imageHeight > 0f) imageWidth / imageHeight else 1f
-
             Image(
                 painter = rememberAsyncImagePainter(model = memeUri),
                 contentDescription = stringResource(R.string.meme_content_description),
@@ -205,9 +210,9 @@ private fun MemeEditorScreen(
                     .onGloballyPositioned {
                         imageWidth = it.size.width.toFloat()
                         imageHeight = it.size.height.toFloat()
-                    }
-                    .aspectRatio(aspectRatio),
-                contentScale = ContentScale.FillBounds
+                    },
+
+                contentScale = ContentScale.Crop
             )
 
             if (memeEditorUiState.textBoxList.isNotEmpty()) {
@@ -414,7 +419,9 @@ private fun MemeEditorScreen(
                           onSaveToDeviceClicked = {
                               onAction(MemeEditorAction.OnSaveToDeviceClicked(captureController))
                           },
-                          onShareMemeClicked = {}
+                          onShareMemeClicked = {
+                              onAction(MemeEditorAction.OnShareMemeClicked(captureController))
+                          }
                       )
                 }
             )

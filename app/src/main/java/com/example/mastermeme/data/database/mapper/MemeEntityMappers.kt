@@ -4,7 +4,7 @@ import com.example.mastermeme.data.database.entity.MemeEntity
 import com.example.mastermeme.domain.model.MemeItem
 
 fun MemeEntity.toMemeItem() = MemeItem.Meme(
-    id = id ?: -1,
+    id = id,
     timeStamp = timeStamp,
     imageUri = imageUri
 )

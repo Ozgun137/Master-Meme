@@ -7,8 +7,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mastermeme.domain.FileManager
 import com.example.mastermeme.domain.MemeRepository
-import com.example.mastermeme.domain.SaveMemeUseCase
+import com.example.mastermeme.domain.SaveMemeToCacheUseCase
+import com.example.mastermeme.domain.SaveMemeToGalleryUseCase
 import com.example.mastermeme.domain.model.MemeItem
 import com.example.mastermeme.domain.util.Result
 import com.example.mastermeme.ui.theme.MasterMemeWhite
@@ -24,9 +26,11 @@ import kotlinx.coroutines.launch
 
 
 class MemeEditorViewModel(
-    private val saveMemeUseCase: SaveMemeUseCase,
+    private val saveMemeToGalleryUseCase: SaveMemeToGalleryUseCase,
+    private val saveMemeToCacheUseCase: SaveMemeToCacheUseCase,
     private val memeRepository: MemeRepository,
-    private val applicationScope : CoroutineScope,
+    private val applicationScope: CoroutineScope,
+    private val fileManager: FileManager
 ) : ViewModel() {
 
     private val _memeEditorUiState = MutableStateFlow(MemeEditorUiState())
@@ -78,8 +82,12 @@ class MemeEditorViewModel(
                 updateSaveMemeSheetState(shouldShowSaveMemeSheet = true)
             }
 
+            is MemeEditorAction.OnShareMemeClicked -> {
+               saveMemeToCache(action.captureController)
+            }
+
             is MemeEditorAction.OnSaveToDeviceClicked -> {
-                  saveMemeToDevice(action.captureController)
+                saveMemeToGallery(action.captureController)
             }
 
             is MemeEditorAction.OnTextChanged -> {
@@ -257,7 +265,7 @@ class MemeEditorViewModel(
         }
     }
 
-    private fun updateSaveMemeSheetState(shouldShowSaveMemeSheet : Boolean) {
+    private fun updateSaveMemeSheetState(shouldShowSaveMemeSheet: Boolean) {
         _memeEditorUiState.update {
             it.copy(
                 shouldShowSaveMemeSheet = shouldShowSaveMemeSheet,
@@ -279,27 +287,45 @@ class MemeEditorViewModel(
 
     }
 
-    private fun saveMemeToDevice(captureController: CaptureController){
+    private fun saveMemeToGallery(
+        captureController: CaptureController,
+    ) {
         val bitmap = viewModelScope.async {
             captureController.captureAsync().await().asAndroidBitmap()
         }
 
-         viewModelScope.launch {
-            val result = saveMemeUseCase(bitmap.await())
-            if(result is Result.Error) {
-                  eventChannel.send(MemeEditorEvent.MemeSaveFailed)
-            }
+        viewModelScope.launch {
+            val result = saveMemeToGalleryUseCase(bitmap.await())
+            if (result is Result.Error) {
+                eventChannel.send(MemeEditorEvent.MemeSaveFailed)
+            } else if (result is Result.Success) {
+                val savedMemeUri = result.data!!
 
-            else if(result is Result.Success) {
                 applicationScope.launch {
-                    saveMemeInDatabase(result.data!!)
+                    saveMemeInDatabase(savedMemeUri)
                 }.join()
                 eventChannel.send(MemeEditorEvent.MemeSaved)
             }
         }
     }
 
-    private fun saveMemeInDatabase(imageUri : String) {
+    private fun saveMemeToCache(
+        captureController: CaptureController
+    ) {
+        val bitmap = viewModelScope.async {
+            captureController.captureAsync().await().asAndroidBitmap()
+        }
+
+        viewModelScope.launch {
+            val result = saveMemeToCacheUseCase(bitmap.await())
+            if (result is Result.Success) {
+                val savedMemeUri = result.data ?: ""
+                shareMeme(savedMemeUri)
+            }
+        }
+    }
+
+    private fun saveMemeInDatabase(imageUri: String) {
         val currentMeme = MemeItem.Meme(
             imageUri = imageUri,
             timeStamp = System.currentTimeMillis()
@@ -307,14 +333,20 @@ class MemeEditorViewModel(
 
         viewModelScope.launch {
             val result = memeRepository.upsertMeme(currentMeme)
-            if(result is Result.Error) {
+            if (result is Result.Error) {
                 eventChannel.send(MemeEditorEvent.LocalDiskFull)
-            }
-
-            else {
+            } else {
                 _memeEditorUiState.update {
                     it.copy(isMemeSaved = true)
                 }
+            }
+        }
+    }
+
+    private fun shareMeme(memeUri: String) = viewModelScope.launch {
+        fileManager.shareFile(memeUri).let { result ->
+            if (result is Result.Error) {
+                eventChannel.send(MemeEditorEvent.ShareMemeFailed)
             }
         }
     }

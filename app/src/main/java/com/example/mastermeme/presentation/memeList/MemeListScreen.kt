@@ -2,6 +2,7 @@ package com.example.mastermeme.presentation.memeList
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +51,15 @@ fun MemeListScreenRoot(
 
     MemeListScreen(
         memeListState = memeListState,
-        onAction = viewModel::onAction,
+        onAction = { action ->
+            when(action) {
+                is MemeListAction.OnMemeSelected -> {
+                    onMemeSelected(action.meme.imageUri)
+                }
+                else -> viewModel.onAction(action)
+            }
+
+        },
         templateSelected = {
             onMemeSelected(it.imageUri)
             viewModel.onAction(MemeListAction.OnBottomSheetDismissed)
@@ -109,7 +118,12 @@ fun MemeListScreen(
                 .padding(top = 16.dp, start = 8.dp, end = 8.dp),
         ) {
             if (memeListState.memes.isNotEmpty()) {
-                MemeListContent(state = memeListState)
+                MemeListContent(
+                    state = memeListState,
+                    onMemeSelected = { meme ->
+                        onAction(MemeListAction.OnMemeSelected(meme))
+                    }
+                )
             } else {
                 MemeListEmptyContent()
             }
@@ -150,7 +164,10 @@ private fun MemeListEmptyContent() {
 }
 
 @Composable
-private fun MemeListContent(state: MemeListUiState) {
+private fun MemeListContent(
+    state: MemeListUiState,
+    onMemeSelected: (MemeItem.Meme) -> Unit,
+) {
     val scrollState = rememberLazyGridState()
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -159,7 +176,11 @@ private fun MemeListContent(state: MemeListUiState) {
         content = {
             items(state.memes.size) { index ->
                 MemeGridItem(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .clickable {
+                            onMemeSelected(state.memes[index])
+                        },
                     model = state.memes[index].imageUri,
                     contentDescription = stringResource(R.string.meme_content_description)
                 )

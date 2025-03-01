@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.provider.MediaStore
-import com.example.mastermeme.domain.SaveMemeUseCase
+import com.example.mastermeme.domain.SaveMemeToGalleryUseCase
 import com.example.mastermeme.domain.util.Error
 import com.example.mastermeme.domain.util.FileError
 import com.example.mastermeme.domain.util.Result
@@ -13,9 +13,9 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-class SaveMemeUseCaseImpl(
+class SaveMemeToGalleryImpl(
     private val context: Context
-) : SaveMemeUseCase {
+) : SaveMemeToGalleryUseCase {
 
     override suspend fun invoke(bitmap: Bitmap): Result<String?, Error> {
         var filePath: String? = null

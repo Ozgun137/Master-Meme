@@ -52,7 +52,7 @@ fun MasterMemeDialog(
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Text(
                     text = title,

@@ -1,6 +1,7 @@
 package com.example.mastermeme
 
 import android.app.Application
+import com.example.mastermeme.data.di.fileManagerModule
 import com.example.mastermeme.data.di.memeDatabaseModule
 import com.example.mastermeme.data.di.memeEditorDataModule
 import com.example.mastermeme.data.di.memeListDataModule
@@ -23,6 +24,7 @@ class MasterMemeApplication : Application() {
             androidContext(this@MasterMemeApplication)
             modules(
                 appModule,
+                fileManagerModule,
                 memeDatabaseModule,
                 memeEditorViewModelModule,
                 memeListViewModelModule,

@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "MemeEntity")
 data class MemeEntity(
-    @PrimaryKey(autoGenerate = true) val id : Int? = null,
+    @PrimaryKey(autoGenerate = true)
+    val id : Int = 0,
     val imageUri : String,
     val timeStamp : Long
 )

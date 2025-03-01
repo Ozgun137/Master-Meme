@@ -26,4 +26,5 @@
     <string name="meme_successfully_saved">Your meme is saved! Check your gallery.</string>
     <string name="meme_can_not_be_saved">Unable to save meme. Please try again later.</string>
     <string name="local_disk_full">Failed to save your meme because your disk is full.</string>
+    <string name="meme_can_not_be_shared">Unable to share the meme, please try again later.</string>
 </resources>
