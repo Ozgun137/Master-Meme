@@ -6,31 +6,32 @@ Master Meme is your ultimate meme-making playground! Pick from a wide collection
 <table>
   <tr>
     <td>
-      <img src="images/MM_Empty Screen.png" alt="Meme List Empty Screen" width="200" height="300"><br>
+      <img src="images/MM_Empty Screen.png" alt="Meme List Empty Screen" width="200" height="250"><br>
       <b>Meme List Empty Screen</b>
     </td>
     <td>
-      <img src="images/MM_Template.png" alt="Meme Templates Bottom Sheet Dialog" width="200" height="300"><br>
+      <img src="images/MM_Template.png" alt="Meme Templates Bottom Sheet Dialog" width="200" height="250"><br>
       <b>Meme Templates Bottom Sheet Dialog</b>
     </td>
     <td>
-      <img src="images/Meme_Screen_Without_Text.png" alt="Meme Editor Screen" width="200" height="300"><br>
+      <img src="images/Meme_Screen_Without_Text.png" alt="Meme Editor Screen" width="200" height="250"><br>
       <b>Meme Editor Screen</b>
     </td>
     <td>
-      <img src="images/Meme_Screen_Text_Update.png" alt="Meme Editor Screen - Edit Text" width="200" height="300"><br>
+      <img src="images/Meme_Screen_Text_Update.png" alt="Meme Editor Screen - Edit Text" width="200" height="250"><br>
       <b>Meme Editor Screen - Edit Text</b>
     </td>
     <td>
-      <img src="images/Meme_Save.png" alt="Meme Editor Screen - Save or Share Meme" width="200" height="300"><br>
+      <img src="images/Meme_Save.png" alt="Meme Editor Screen - Save or Share Meme" width="200" height="250"><br>
       <b>Meme Editor Screen - Save or Share Meme</b>
     </td>
     <td>
-      <img src="images/Meme_Main.png" alt="Meme List Screen" width="200" height="300"><br>
+      <img src="images/Meme_Main.png" alt="Meme List Screen" width="200" height="250"><br>
       <b>Meme List Screen</b>
     </td>
   </tr>
 </table>
+
 
 
 ## Technologies
